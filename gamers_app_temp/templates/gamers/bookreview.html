@@ -1,0 +1,45 @@
+<!-- Reviews for a selected book -->
+{% extends "gamers/base.html" %}
+
+{% block content %}
+
+<p>Book name: <b>{{ reviews.name }}</b></p>
+	<p>Authors:
+	{% for sa in reviews.authors %}
+		<b>{{ sa }}</b> |
+	{% empty %}
+		<b>Authors: Do not exist
+	{% endfor %} 
+	</p>
+<p>Release year: <b>{{ reviews.year_published }}</b></p>
+<p>Added by: <b>{{ reviews.owner }}</b></p>
+
+<p><br><br>Reviews</p>
+<p><a href="{% url 'gamers:new_review' reviews.id%}">Add a new review</a></p>
+	<ul>
+		{% for sr in review %}
+			<li>
+				<p><u>Date reviewed</u>: <b>{{ sr.date_added|date:"M d, Y H:i" }}</b></p>
+				<p><u>Stars</u>: <b>{{ sr.stars }}</b></p>
+				{% if sr.unfinished is False %}
+					<p><u>Unfinished?</u>: <b>Yes</b></p>
+				{% else %}
+					<p><u>Unfinished?</u>: <b>No</b></p>
+				{% endif %}
+				<p><u>Review</u>: <i>{{ sr.my_review|linebreaks }}</i></p>
+
+				{% if sr.owner != request.user %}
+				<p>Only <b>{{ sr.owner }}</b> can edit this review</p>
+				{% elif request.user == "admin" %}
+				<p><a href="{% url 'gamers:edit_review' sr.id%}">Edit review as <b>admin</b></a></p>
+				{% else %}
+				<p><a href="{% url 'gamers:edit_review' sr.id%}">Edit review</a></p>
+				{% endif %}
+				
+				
+			</li>
+			{% empty %}
+				<li>No reviews have been added yet</li>
+		{% endfor %}
+	</ul>
+{% endblock content %}

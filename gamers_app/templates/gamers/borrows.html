@@ -1,0 +1,30 @@
+<!-- All borrows for every game -->
+{% extends "gamers/base.html" %}
+
+{% block content %}
+<p>All borrows:</p>
+	<ul>
+		{% for sb in borrow %}
+			<li>
+				<p><u>Game name</u>: <a href="{%url 'gamers:gameborrow' sb.game.id%}"><b>{{ sb.game.name }}</b></a></p>
+				<p><u>Date borrowed</u>: <b>{{ sb.date_added|date:"M d, Y H:i" }}</b></p>
+				<p><u>Borrowing status</u>: <b>{{ sb.stars }}</b></p>
+				{% if sb.currentstatus is False %}
+					<p><u>Borrowed?</u>: <b>Yes</b></p>
+				{% else %}
+					<p><u>Borrowed?</u>: <b>No</b></p>
+				{% endif %}
+				<p><u>Notes</u>: <i>{{ sb.notes|linebreaks }}</i></p>
+				
+				{% if sb.borrower != request.user %}
+				<p>Only <b>{{ sb.owner }}</b> can return this game</p>
+				{% else %}
+				<p><a href="{% url 'gamers:edit_borrow' sb.id%}">Return game</a></p>
+				{% endif %}
+				
+			</li>
+		{% empty %}
+			<li>There are no borrows yet</li>
+		{% endfor %} 
+	</ul>
+{% endblock content %}

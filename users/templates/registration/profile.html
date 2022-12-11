@@ -1,0 +1,18 @@
+{% extends "gamers/base.html" %}
+{% block content %}
+		
+		<ul>Username: <b>{{ user.username }}</b> </ul>
+		<ul>Date created: <b> {{ user.date_joined|date:"M d, Y H:i" }} </b></ul>
+		
+		<ul>Borrowed games:
+		<b>
+			{% for sb in borrow %}
+				<p><u>Game name</u>: <a href="{%url 'gamers:gameborrow' sb.game.id%}"><b>{{ sb.game.name }}</b></a></p>
+			{% if sb.borrower != request.user %}
+				<p><a href="{% url 'gamers:edit borrow' sb.id%}">Return game</a></p>
+			{% endif %}
+			{% empty %}
+				<p>You have no borrows currently</p>
+			{% endfor %} 
+		</b></ul>
+{% endblock content %}

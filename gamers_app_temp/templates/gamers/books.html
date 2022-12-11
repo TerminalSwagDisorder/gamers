@@ -1,0 +1,14 @@
+{% extends "gamers/base.html" %}
+{% block content %}
+
+<p>Books</p>
+	<ul>
+		{% for sg in books %}
+			<li><a href="{%url 'gamers:bookreview' sg.id%}">{{ sg }}</a></li>
+		{% empty %}
+			<li>No books have been added yet</li>
+		{% endfor %}
+	</ul>
+	
+	<a href="{% url 'gamers:new_book' %}">Add a new book</a>
+{% endblock content %}

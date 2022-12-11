@@ -1,0 +1,14 @@
+{% extends "gamers/base.html" %}
+{% block content %}
+
+<p>Games</p>
+	<ul>
+		{% for sg in games %}
+			<li><a href="{%url 'gamers:gameborrow' sg.id%}">{{ sg }}</a><p><a href="{% url 'gamers:new_borrow' sg.id%}">>Borrow this game</a></p></li>
+		{% empty %}
+			<li>No games have been added yet</li>
+		{% endfor %}
+	</ul>
+	
+	<a href="{% url 'gamers:new_game' %}">Add a new game</a>
+{% endblock content %}

@@ -1,0 +1,30 @@
+<!-- All reviews for every book -->
+{% extends "gamers/base.html" %}
+
+{% block content %}
+<p>All reviews:</p>
+	<ul>
+		{% for sr in review %}
+			<li>
+				<p><u>Book name</u>: <a href="{%url 'gamers:bookreview' sr.book.id%}"><b>{{ sr.book.name }}</b></a></p>
+				<p><u>Date reviewed</u>: <b>{{ sr.date_added|date:"M d, Y H:i" }}</b></p>
+				<p><u>Stars</u>: <b>{{ sr.stars }}</b></p>
+				{% if sr.unfinished is False %}
+					<p><u>Unfinished?</u>: <b>Yes</b></p>
+				{% else %}
+					<p><u>Unfinished?</u>: <b>No</b></p>
+				{% endif %}
+				<p><u>Review</u>: <i>{{ sr.my_review|linebreaks }}</i></p>
+				
+				{% if sr.owner != request.user %}
+				<p>Only <b>{{ sr.owner }}</b> can edit this review</p>
+				{% else %}
+				<p><a href="{% url 'gamers:edit_review' sr.id%}">Edit review</a></p>
+				{% endif %}
+				
+			</li>
+		{% empty %}
+			<li>There are no reviews yet</li>
+		{% endfor %} 
+	</ul>
+{% endblock content %}
