@@ -24,8 +24,9 @@ def games(request):
 #Borrows for a specific game
 def gameborrow(request, games_id):
 	games = Game.objects.get(id = games_id)
-	borrow = games.borrow_set.order_by("date_added")
-	context = {"games":games, "borrow":borrow}
+	borrow = games.borrow_set.order_by("-date_modified")
+	borrowfilter = Borrow.objects.filter(game = games_id)
+	context = {"games":games, "borrow":borrow, "borrowfilter":borrowfilter}
 	return render(request, "gamers/gameborrow.html", context)
 
 #All borrows
@@ -54,6 +55,7 @@ def new_game(request):
 @login_required	
 #Add new borrow	
 def new_borrow(request, game_id):
+	#if game is borrowed dont allow it to be borrowed
 	games = Game.objects.get(id = game_id)
 	if request.method != "POST":
 		#No data submitted -> blank form
@@ -62,7 +64,11 @@ def new_borrow(request, game_id):
 		#POST data submitted
 		form = BorrowForm(data = request.POST)
 		if form.is_valid():
-			if not form.fields["currentstatus"].has_changed(request.GET, request.POST):
+			#if not "currentstatus" in form.changed_data:
+			#	raise StatusException("To borrow this game you must check the box!")
+			if not form.cleaned_data["currentstatus"] == True:
+				raise StatusException("You cannot submit the form with an unchecked box!")
+			elif not form.has_changed():
 				raise StatusException("To borrow this game you must check the box!")
 			else:
 				new_borrow = form.save(commit = False)
@@ -76,23 +82,43 @@ def new_borrow(request, game_id):
 @login_required	
 #Edit an existing borrow
 def edit_borrow(request, game_id):
-	'''Edit an existing experience'''
 	borrow = Borrow.objects.get(id = game_id)
 	gameborrow = borrow.game
 	#Authenticate user as object owner
-	if gameborrow.owner != request.user:
+	if borrow.borrower != request.user:
 		raise Http404
 	if request.method != "POST":
 		#Initial request, prefill form with current data
 		form = BorrowForm(instance = borrow)
 	else:
 		#POST data submitted
-		form = BorrowForm(request.POST, instance = borrow)
+		form = BorrowForm(instance = borrow, data = request.POST)
 		if form.is_valid():
-			if not form.fields["currentstatus"].has_changed(request.GET, request.POST):
-				raise StatusException("To borrow this game you must check the box!")
+			#if not "currentstatus" in form.changed_data:
+			#	raise StatusException("To return this game you must uncheck the box!")
+			if not form.cleaned_data["currentstatus"] == False:
+				#print(form.fields["currentstatus"], form.cleaned_data["currentstatus"])
+				raise StatusException("You cannot submit the form with a checked box!")
+			elif not form.has_changed():
+				raise StatusException("You cannot return an already returned game!")
 			else:
 				form.save()
 				return redirect("gamers:gameborrow", gameborrow.id)
 	context = {"borrow":borrow, "gameborrow":gameborrow, "form":form}
 	return render(request, "gamers/edit_borrow.html", context)
+	
+'''
+			#if not "currentstatus" in form.changed_data:
+			#	raise StatusException("To borrow this game you must check the box!")
+			if not "currentstatus" in form.changed_data == False:
+				raise StatusException("You cannot submit the form with an unchecked box!")
+
+
+				if not form.has_changed():
+				raise StatusException("To return this game you must uncheck the box!")
+				if not "currentstatus" in form.changed_data:
+					raise StatusException("You cannot submit the form with a checked box!")
+			elif form.has_changed() and "currentstatus" in form.changed_data:
+				form.save()
+				return redirect("gamers:gameborrow", gameborrow.id)
+'''				

@@ -8,30 +8,44 @@
 <p>Genre: <b>{{ games.genre }}</b></p>
 <p>Developer: <b>{{ games.developer }}</b></p>
 <p>Release year: <b>{{ games.year_published }}</b></p>
-<p>Borrow status: <b>{{ games.currentstatus }}</b></p>
+
+<p>debug: {{ games.id }},{{ borrow.first.game.id }}, {{ borrow.first.currentstatus }} </p>
+{% if games.id == borrow.last.game.id and borrow.first.currentstatus == False %}
+<p>Borrowed?: <b>No</b></p>
+{% elif borrow.last.id is Null %}
+<p>Borrowed?: <b>No</b></p>
+{% else %}
+	<p>Borrowed?: <b>Yes</b></p>
+	<p>This game is currently borrowed by: <b>{{borrow.first.borrower}}</b></p>
+{% endif %}
+
+
 
 <p><br><br>Borrows</p>
+{% if games.id == borrow.last.game.id and borrow.first.currentstatus == False %}
 <p><a href="{% url 'gamers:new_borrow' games.id%}">>Borrow this game</a></p>
+{% else %}
+<p>This game is currently borrowed<a href="{% url 'gamers:new_borrow' games.id%}">   debug borrow</a></p>
+{% endif %}
+
 	<ul>
 		{% for sb in borrow %}
 			<li>
 				<p><u>Game name</u>: <a href="{%url 'gamers:gameborrow' sb.game.id%}"><b>{{ sb.game.name }}</b></a></p>
 				<p><u>Date borrowed</u>: <b>{{ sb.date_added|date:"M d, Y H:i" }}</b></p>
+				<p><u>Date debug</u>: <b>{{ sb.date_modified|date:"M d, Y H:i" }}</b></p>
 				<p><u>Borrowing status</u>: <b>{{ sb.stars }}</b></p>
 				{% if sb.currentstatus is False %}
-					<p><u>Borrowed?</u>: <b>Yes</b></p>
-				{% else %}
 					<p><u>Borrowed?</u>: <b>No</b></p>
+				{% else %}
+					<p><u>Borrowed?</u>: <b>Yes</b></p>
 				{% endif %}
 				<p><u>Notes</u>: <i>{{ sb.notes|linebreaks }}</i></p>
-				
 				{% if sb.borrower != request.user %}
-				<p>Only <b>{{ sb.owner }}</b> can return this game</p>
+				<p>Only <b>{{ sb.borrower }}</b> can return this game</p>
 				{% else %}
 				<p><a href="{% url 'gamers:edit_borrow' sb.id%}">Return game</a></p>
-				{% endif %}
-				
-				
+				{% endif %}			
 			</li>
 			{% empty %}
 				<li>No one has borrowed this game yet</li>

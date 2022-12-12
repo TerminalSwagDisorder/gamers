@@ -14,6 +14,6 @@ class BorrowForm(forms.ModelForm):
 	class Meta:
 		model = Borrow
 		fields = ["notes", "currentstatus"]
-		labels = {"notes":"Notes", "currentstatus":"Check this box to be able to borrow this game"}
+		labels = {"notes":"Notes", "currentstatus":"Check this to borrow the game, uncheck this to return the game"}
 		widgets = {"notes":forms.Textarea(attrs={"cols":80})}
 		#Form.has_changed()

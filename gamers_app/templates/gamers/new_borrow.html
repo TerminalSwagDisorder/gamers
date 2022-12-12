@@ -2,6 +2,8 @@
 {% block content %}
 
 <p><a href="{% url 'gamers:gameborrow' games.id %}">{{ borrow.game }}</a></p>
+<p>{{ games }}</p>
+
 
 	<p>Borrow game:</p>
 	<form action="{% url 'gamers:new_borrow' games.id %}" method="POST">
