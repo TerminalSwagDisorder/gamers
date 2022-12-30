@@ -10,7 +10,7 @@ class Game(models.Model):
 	owner = models.ForeignKey(User, on_delete = models.CASCADE, default = 3)
 	name = models.CharField(max_length = 100)
 	genre = models.CharField(max_length = 100)
-	delevoper = models.CharField(max_length = 100)
+	developer = models.CharField(max_length = 100)
 	year_published = models.IntegerField(default = datetime.date.today().year)
 	date_added = models.DateTimeField(auto_now_add = True)
 	date_modified = models.DateTimeField(auto_now = True)

@@ -1,1 +1,1 @@
-use password gamers1234 for each user for now, for ease of use
+use password gamers1234 for now, for ease of use

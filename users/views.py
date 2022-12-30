@@ -22,9 +22,10 @@ def register(request):
 	#Display an empty or invalid form
 	context = {"form":form}
 	return render(request, "registration/register.html", context)
-
+'''
 @login_required
 def profile(request):
 	userprofile = Profile.objects.filter(user = request.user)
 	context = {"userprofile":userprofile}
 	return render(request, "registration/profile.html")
+'''

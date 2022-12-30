@@ -1,8 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
+from django.contrib import messages
+from django.contrib.auth.models import User as user
 
 from .models import Game, Borrow, Gamer
+from users.models import Profile
 from .forms import GameForm, BorrowForm
 
 #Custom exception
@@ -17,7 +20,7 @@ def index(request):
 	
 #Show all games	
 def games(request):
-	games = Game.objects.order_by("name")
+	games = Game.objects.order_by("id")
 	context = {"games":games}
 	return render(request, "gamers/games.html", context)
 
@@ -52,6 +55,19 @@ def new_game(request):
 	context = {"form":form}
 	return render(request, "gamers/new_game.html", context)
 
+@login_required
+#Delete owned game
+def delete_game(request, game_id):
+  if request.method == "GET":
+    game = get_object_or_404(Game, pk=game_id)
+    if game.owner == request.user:
+      game.delete()
+      return redirect("gamers:index")
+    else:
+      messages.error(request, "You can only delete games that you have added.")
+  return redirect("gamers:index")
+
+
 @login_required	
 #Add new borrow	
 def new_borrow(request, game_id):
@@ -64,12 +80,18 @@ def new_borrow(request, game_id):
 		#POST data submitted
 		form = BorrowForm(data = request.POST)
 		if form.is_valid():
-			#if not "currentstatus" in form.changed_data:
-			#	raise StatusException("To borrow this game you must check the box!")
+			#Perform different validations
+			# Check if the user has already borrowed 3 games
+			borrow_count = Borrow.objects.filter(borrower=request.user, currentstatus=True).count()
+			if borrow_count >= 3:
+				messages.error(request, "You have already borrowed the maximum number of games (3), return one of your currently borrowed games to be able to borrow more games!")
+				return redirect('gamers:gameborrow', game_id)
 			if not form.cleaned_data["currentstatus"] == True:
-				raise StatusException("You cannot submit the form with an unchecked box!")
+				messages.error(request, "You cannot submit the form with an unchecked box!")
+				return redirect('gamers:gameborrow', game_id)
 			elif not form.has_changed():
-				raise StatusException("To borrow this game you must check the box!")
+				messages.error(request, "To borrow this game you must check the box!")
+				return redirect('gamers:gameborrow', game_id)
 			else:
 				new_borrow = form.save(commit = False)
 				new_borrow.game = games
@@ -94,31 +116,24 @@ def edit_borrow(request, game_id):
 		#POST data submitted
 		form = BorrowForm(instance = borrow, data = request.POST)
 		if form.is_valid():
-			#if not "currentstatus" in form.changed_data:
-			#	raise StatusException("To return this game you must uncheck the box!")
+			#Perform different validations
 			if not form.cleaned_data["currentstatus"] == False:
-				#print(form.fields["currentstatus"], form.cleaned_data["currentstatus"])
-				raise StatusException("You cannot submit the form with a checked box!")
+				messages.error(request, "You cannot submit the form with a checked box!")
+				return redirect('gamers:gameborrow', gameborrow.id)
 			elif not form.has_changed():
-				raise StatusException("You cannot return an already returned game!")
+				messages.error(request, "You cannot return an already returned game!")
+				return redirect('gamers:gameborrow', gameborrow.id)
 			else:
 				form.save()
 				return redirect("gamers:gameborrow", gameborrow.id)
 	context = {"borrow":borrow, "gameborrow":gameborrow, "form":form}
 	return render(request, "gamers/edit_borrow.html", context)
 	
-'''
-			#if not "currentstatus" in form.changed_data:
-			#	raise StatusException("To borrow this game you must check the box!")
-			if not "currentstatus" in form.changed_data == False:
-				raise StatusException("You cannot submit the form with an unchecked box!")
-
-
-				if not form.has_changed():
-				raise StatusException("To return this game you must uncheck the box!")
-				if not "currentstatus" in form.changed_data:
-					raise StatusException("You cannot submit the form with a checked box!")
-			elif form.has_changed() and "currentstatus" in form.changed_data:
-				form.save()
-				return redirect("gamers:gameborrow", gameborrow.id)
-'''				
+@login_required
+def profile(request):
+	userprofile = Profile.objects.filter(user = request.user)
+	borrow = Borrow.objects.filter(borrower = request.user, currentstatus = True).order_by("-date_modified")
+	games = Game.objects.filter(owner = request.user).order_by("id")
+	context = {"userprofile":userprofile, "borrow":borrow, "games":games}
+	return render(request, "gamers/profile.html", context)
+		

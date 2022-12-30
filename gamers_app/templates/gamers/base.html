@@ -1,13 +1,22 @@
 <p>
-	<a href="{% url 'gamers:index' %}">Gamers</a>
+	<a href="{% url 'gamers:index' %}">Index</a>
 	<a href="{% url 'gamers:games' %}">Games</a>
-	<a href="{% url 'gamers:borrows' %}">Borrows</a>
 	{% if user.is_authenticated %}
-		User: <a href="{% url 'users:profile' %}"> <b>{{ user.username }}</b> </a>
+		User: <a href="{% url 'gamers:profile' %}"> <b>{{ user.username }}</b> </a>
 		<a href="{% url 'users:logout' %}">Log out</a>
 	{% else %}
 		<a href="{% url 'users:register' %}">Register</a>
 		<a href="{% url 'users:login' %}">Log in</a>
 	{% endif %}
 </p>
+{% block messages %}
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <b><ul{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</ul></b>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
+
 {% block content %}{% endblock content %}

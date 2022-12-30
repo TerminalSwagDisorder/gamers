@@ -4,9 +4,9 @@
 <p>Games</p>
 	<ul>
 		{% for sg in games %}
-			<li><a href="{%url 'gamers:gameborrow' sg.id%}">{{ sg }}</a><p><a href="{% url 'gamers:new_borrow' sg.id%}">>Borrow this game</a></p></li>
+			<ul><a href="{%url 'gamers:gameborrow' sg.id%}"><b>{{ sg }}</b></a> | Owner: <b>{{ sg.owner }}</b></ul><br> 
 		{% empty %}
-			<li>No games have been added yet</li>
+			<ul>No games have been added yet</ul>
 		{% endfor %}
 	</ul>
 	
